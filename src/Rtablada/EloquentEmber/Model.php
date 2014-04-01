@@ -9,28 +9,29 @@ class Model extends \Illuminate\Database\Eloquent\Model
 		$relations = array_intersect(array_keys($this->relations), $relationsToLoad);
 		$sideloaded = $this->relationsToArray();
 
+		$emberRelations = array();
 		foreach ($relations as $relation) {
 			$collection = $this->$relation;
+			$key = snake_case($relation);
 			// If Plural
 			if (substr($relation, -1) === 's') {
-				$key = snake_case(str_singular($relation));
-				$this->attributes["{$key}_ids"] = $collection->modelKeys();
+				$emberRelations["{$key}"] = $collection->modelKeys();
 			} else {
-				$this->attributes["{$relation}_id"] = $collection->modelKeys();
+				$emberRelations["{$key}"] = $collection->getKey();
 			}
 		}
 
 
 		if (!$withWrap) {
-			return $this->removeRelations($relations);
+			return array_merge($this->removeRelations($relations), $emberRelations);
 		} else {
-			return $this->sideloadRelated($relations, $sideloaded);
+			return $this->sideloadRelated($relations, $sideloaded, $emberRelations);
 		}
 	}
 
-	public function sideloadRelated($relations, $sideloaded)
+	public function sideloadRelated($relations, $sideloaded, $emberRelations)
 	{
-		$array = array($this->getModelKey() => $this->removeRelations($relations));
+		$array = array($this->getModelKey() => array_merge($this->removeRelations($relations), $emberRelations));
 
 		return array_merge($array, $sideloaded);
 	}
@@ -40,7 +41,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
 		$array = $this->toArray();
 
 		foreach ($relations as $relation) {
-			unset($array[$relation]);
+			unset($array[snake_case($relation)]);
 		}
 
 		return $array;

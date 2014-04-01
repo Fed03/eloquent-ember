@@ -19,7 +19,7 @@ class Collection extends \Illuminate\Database\Eloquent\Collection
 		$this->modelKey = $modelKey;
 	}
 
-	public function toEmberArray()
+	public function toEmberArray($relationsToLoad = array())
 	{
 		$modelKey = $this->getModelKey();
 
@@ -32,9 +32,9 @@ class Collection extends \Illuminate\Database\Eloquent\Collection
 			$relations = array_merge_recursive($model->relationsToArray(), $relations);
 		});
 
-		$this->each(function($model) use (&$items)
+		$this->each(function($model) use (&$items, $relationsToLoad)
 		{
-			$items[] = $model->toEmberArray(false);
+			$items[] = $model->toEmberArray(false, $relationsToLoad);
 		});
 
 		$array = array($modelKey => $items);
