@@ -21,6 +21,9 @@ class Collection extends \Illuminate\Database\Eloquent\Collection
 
 	public function toEmberArray($relationsToLoad = array())
 	{
+		if (!is_array($relationsToLoad))
+			$relationsToLoad = func_get_args();
+
 		$modelKey = $this->getModelKey();
 
 		$items = array();
@@ -38,7 +41,7 @@ class Collection extends \Illuminate\Database\Eloquent\Collection
 
 		$this->each(function($model) use (&$items, $relationsToLoad)
 		{
-			$items[] = $model->toEmberArray(false, $relationsToLoad);
+			$items[] = $model->toEmberArray($relationsToLoad, false);
 		});
 
 		$array = array($modelKey => $items);
