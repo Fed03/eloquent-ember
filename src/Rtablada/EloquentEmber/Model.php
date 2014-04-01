@@ -11,12 +11,11 @@ class Model extends \Illuminate\Database\Eloquent\Model
 		$emberRelations = array();
 		foreach ($relations as $relation) {
 			$collection = $this->$relation;
-			$key = snake_case($relation);
 			// If Plural
 			if (substr($relation, -1) === 's') {
-				$emberRelations["{$key}"] = $collection->modelKeys();
+				$emberRelations[$relation] = $collection->modelKeys();
 			} else {
-				$emberRelations["{$key}"] = $collection->getKey();
+				$emberRelations[$relation] = $collection->getKey();
 			}
 		}
 

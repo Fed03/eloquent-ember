@@ -74,9 +74,9 @@ class Collection extends \Illuminate\Database\Eloquent\Collection
 		$computed = array();
 		foreach ($relations as $key => $value) {
 			if ($value instanceof LaravelCollection) {
-				$computed[snake_case($key)] = $value->toArray();
+				$computed[$key] = $value->toArray();
 			} else {
-				$computed[snake_case(str_plural($key))] = array($value->toArray());
+				$computed[str_plural($key)] = array($value->toArray());
 			}
 		}
 
