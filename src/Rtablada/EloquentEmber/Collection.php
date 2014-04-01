@@ -27,18 +27,15 @@ class Collection extends \Illuminate\Database\Eloquent\Collection
 
 		$relations = array();
 
-		$this->each(function($model) use (&$relations)
+		$this->each(function($model) use (&$relations, $relationsToLoad)
 		{
-			foreach ($model->getRelations() as $key => $value) {
-				if ($value instanceof LaravelCollection) {
-					$modelRelation[snake_case($key)] = $value->toArray();
-				} else {
-					$modelRelation[snake_case(str_plural($key))] = array($value->toArray());
-				}
-			}
-			$relations = array_merge_recursive($modelRelation, $relations);
+			$loadedRelations = array_intersect_key($model->getRelations(), array_flip($relationsToLoad));
+
+			$computedRelations = $this->getEmberRelations($loadedRelations);
+
+			$relations = array_merge_recursive($computedRelations, $relations);
 		});
-return $relations;
+
 		$this->each(function($model) use (&$items, $relationsToLoad)
 		{
 			$items[] = $model->toEmberArray(false, $relationsToLoad);
@@ -67,5 +64,19 @@ return $relations;
 		}
 
 		return new static(array_values($dictionary), $sideloads, $modelKey);
+	}
+
+	protected function getEmberRelations(array $relations)
+	{
+		$computed = array();
+		foreach ($relations as $key => $value) {
+			if ($value instanceof LaravelCollection) {
+				$computed[snake_case($key)] = $value->toArray();
+			} else {
+				$computed[snake_case(str_plural($key))] = array($value->toArray());
+			}
+		}
+
+		return $computed;
 	}
 }
