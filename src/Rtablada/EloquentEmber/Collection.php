@@ -29,9 +29,16 @@ class Collection extends \Illuminate\Database\Eloquent\Collection
 
 		$this->each(function($model) use (&$relations)
 		{
-			$relations = array_merge_recursive($model->relationsToArray(), $relations);
+			foreach ($model->getRelations() as $key => $value) {
+				if ($value instanceof LaravelCollection) {
+					$modelRelation[snake_case($key)] = $value->toArray();
+				} else {
+					$modelRelation[snake_case(str_plural($key))] = array($value->toArray());
+				}
+			}
+			$relations = array_merge_recursive($modelRelation, $relations);
 		});
-
+return $relations;
 		$this->each(function($model) use (&$items, $relationsToLoad)
 		{
 			$items[] = $model->toEmberArray(false, $relationsToLoad);
