@@ -4,9 +4,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
 {
 	protected $withIds = array();
 
-	public function toEmberArray($withWrap = true)
+	public function toEmberArray($withWrap = true, $relationsToLoad = array())
 	{
-		$relations = array_merge($this->withIds, $this->with);
+		$relations = array_intersect(array_keys($this->relations), $relationsToLoad);
 		$sideloaded = $this->relationsToArray();
 
 		foreach ($relations as $relation) {
