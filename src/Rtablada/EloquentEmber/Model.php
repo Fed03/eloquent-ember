@@ -2,11 +2,9 @@
 
 class Model extends \Illuminate\Database\Eloquent\Model
 {
-	protected $withIds = array();
-
-	public function toEmberArray($relationsToLoad = array(), $withWrap = true)
+	public function toEmberArray($withWrap = true)
 	{
-		$relations = array_intersect(array_keys($this->relations), $relationsToLoad);
+		$relations = array_keys($this->relations);
 
 		$emberRelations = array();
 		foreach ($relations as $relation) {
@@ -18,7 +16,6 @@ class Model extends \Illuminate\Database\Eloquent\Model
 				$emberRelations[$relation] = $collection->getKey();
 			}
 		}
-
 
 		if (!$withWrap) {
 			return array_merge($this->removeRelations($relations), $emberRelations);

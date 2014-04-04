@@ -19,29 +19,24 @@ class Collection extends \Illuminate\Database\Eloquent\Collection
 		$this->modelKey = $modelKey;
 	}
 
-	public function toEmberArray($relationsToLoad = array())
+	public function toEmberArray()
 	{
-		if (!is_array($relationsToLoad))
-			$relationsToLoad = func_get_args();
-
 		$modelKey = $this->getModelKey();
 
 		$items = array();
 
 		$relations = array();
 
-		$this->each(function($model) use (&$relations, $relationsToLoad)
+		$this->each(function($model) use (&$relations)
 		{
-			$loadedRelations = array_intersect_key($model->getRelations(), array_flip($relationsToLoad));
-
-			$computedRelations = $this->getEmberRelations($loadedRelations);
+			$computedRelations = $this->getEmberRelations($model->getRelations());
 
 			$relations = array_merge_recursive($computedRelations, $relations);
 		});
 
-		$this->each(function($model) use (&$items, $relationsToLoad)
+		$this->each(function($model) use (&$items)
 		{
-			$items[] = $model->toEmberArray($relationsToLoad, false);
+			$items[] = $model->toEmberArray(false);
 		});
 
 		$array = array($modelKey => $items);
@@ -73,7 +68,12 @@ class Collection extends \Illuminate\Database\Eloquent\Collection
 	{
 		$computed = array();
 		foreach ($relations as $key => $value) {
-			if ($value instanceof LaravelCollection) {
+			if ($value instanceof self) {
+				$nestedRelationships = $value->toEmberArray();
+				foreach (array_keys($nestedRelationships) as $nestedKey) {
+					$computed[$nestedKey] = $nestedRelationships[$nestedKey];
+				}
+			} else if($value instanceof LaravelCollection) {
 				$computed[$key] = $value->toArray();
 			} else {
 				$computed[str_plural($key)] = array($value->toArray());
