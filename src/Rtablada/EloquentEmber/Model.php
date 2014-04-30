@@ -29,7 +29,17 @@ class Model extends \Illuminate\Database\Eloquent\Model
 	{
 		$array = array($this->getModelKey() => array_merge($this->removeRelations($relations), $emberRelations));
 
-		return array_merge($array, $sideloaded);
+		$tmp = array();
+		foreach ($relations as $relation) {
+			if (substr($relation, -1) === 's') {
+				$tmp[$relation] = $sideloaded[snake_case($relation)];
+			} else {
+				$tmp[str_plural($relation)] = array(
+					$sideloaded[snake_case($relation)]
+				);
+			}
+		}
+		return array_merge($array, $tmp);
 	}
 
 	public function removeRelations($relations)
